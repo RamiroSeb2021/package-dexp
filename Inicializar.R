@@ -43,5 +43,5 @@ devtools::build_readme()
 usethis::use_pkgdown()
 pkgdown::build_site()
 
-devtools::install_github("RamiroSeb2021/package-dexp/")
+devtools::install_github("RamiroSeb2021/package-dexp")
 
