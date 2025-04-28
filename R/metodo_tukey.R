@@ -4,52 +4,55 @@ NULL
 
 # Calcular desviacion estandar y grados de libertad  ----------------------
 
-#' Estimación de la desviación estándar y sus grados de libertad
+#' Estimación de la desviación estándar corregida y grados de libertad
 #'
-#' Esta función estima la desviación estándar experimental \code{S1} y sus grados de libertad
-#' (\code{df1}) a partir de los límites inferior y superior de un intervalo de confianza
-#' para la desviación estándar de una variable cuantitativa. Utiliza cuantiles de la
-#' distribución \code{chi-cuadrado} para encontrar el número de grados de libertad que
-#' mejor reproduce el cociente entre los límites dados, dentro de un error relativo permitido.
+#' Esta función estima una desviación estándar corregida (\code{S1}) y el número de grados de libertad
+#' (\code{df1}) que reproduce, mediante cocientes de chi-cuadrado, la relación entre un límite superior
+#' y un límite inferior dados. Se usa un criterio de error relativo máximo permitido para la aceptación del resultado.
 #'
-#' @param vector_interes Vector numérico que representa la variable bajo estudio.
-#' @param Si Límite inferior de la desviación estándar (en unidades relativas a la media).
-#' @param Ss Límite superior de la desviación estándar (en unidades relativas a la media).
-#' @param max_error Error relativo máximo permitido entre el cociente observado y el estimado (por defecto \code{0.01}).
-#' @param confianza Nivel de confianza del intervalo original (por defecto \code{0.95}). **(Nota: actualmente no se usa dentro del cálculo, pero puede ser útil para versiones futuras).**
+#' @param desviacion_estandar Desviación estándar inicial (en unidades de la variable estudiada).
+#' @param Si Porcentaje relativo inferior aceptado (por ejemplo, 0.07 corresponde a un 7\%).
+#' @param Ss Porcentaje relativo superior aceptado (por ejemplo, 0.12 corresponde a un 12\%).
+#' @param max_error Error relativo máximo permitido entre el cociente observado y el cociente esperado (por defecto \code{0.01}).
+#' @param confianza Nivel de confianza del intervalo considerado (por defecto \code{0.9}). *Actualmente fijo en los cálculos internos.*
+#' @param maximum_df Máximo número de grados de libertad que se evaluarán (por defecto \code{1000}).
 #'
 #' @return Una lista con los siguientes elementos:
 #' \describe{
-#'   \item{Media}{Media de la variable observada.}
-#'   \item{S1}{Estimación de la desviación estándar experimental.}
-#'   \item{grados_libertad}{Grados de libertad estimados (df1).}
-#'   \item{valor_x}{Cociente chi-cuadrado usado en la estimación.}
-#'   \item{error_relativo}{Error relativo del cociente estimado respecto al observado.}
+#'   \item{Media}{Promedio de los límites corregidos (\code{S1}).}
+#'   \item{S1}{Estimación corregida de la desviación estándar.}
+#'   \item{grados_libertad}{Número de grados de libertad estimado.}
+#'   \item{valor_x}{Cociente calculado entre los cuantiles de chi-cuadrado.}
+#'   \item{error_relativo}{Error relativo del cociente estimado respecto al cociente observado.}
 #' }
+#'
+#' @details
+#' Se busca el número de grados de libertad tal que el cociente de los valores críticos de la distribución chi-cuadrado,
+#' evaluados a \code{p = confianza} y \code{p = 1 - confianza}, sea cercano al cociente observado entre \code{Ss} y \code{Si}.
+#' El proceso finaliza tan pronto como el error relativo esté por debajo del máximo permitido (\code{max_error}).
 #'
 #' @examples
 #' set.seed(123)
-#' vector_ <- rnorm(1000, mean = 30, sd = 6)
-#' calcular_S1_df1(vector_interes = vector_, Si = 0.07, Ss = 0.12)
+#' calcular_S1_df1(desviacion_estandar = 30, Si = 0.07, Ss = 0.12)
 #'
 #' @export
 
-calcular_S1_df1 <- function(vector_interes,
+
+calcular_S1_df1 <- function(desviacion_estandar, 
                             Si,
-                            Ss,
+                            Ss, 
                             max_error = 0.01,
-                            confianza = 0.95){
+                            confianza = 0.9,
+                            maximum_df = 1000){
 
-  media <- mean(vector_interes)
-  n <- length(vector_interes)
-  media_sd <- media/sqrt(n)
-  SI <- media_sd * Si
-  SS <- media_sd * Ss
-
+  
+  SI <- desviacion_estandar * Si
+  SS <- desviacion_estandar * Ss
+  
   S1 <- (SI + SS)/2
-
+  
   Cociente <- round(SS/SI, 2)
-
+  
   x <- numeric(n)
   for(i in 1:n){
     x[i] <-
@@ -92,10 +95,10 @@ calcular_A <- function(alfa, r, sigma){
   # alfa: Nivel de significancia
   # t: Numero de tratamientos
   # sigma: Desviacion estandar
-
+  
   numerador <- qt(p = 1 - alfa, df = r - 1) * 2 * sigma * gamma(r/2)
   denominador <- sqrt(r)*sqrt((r-1)) * gamma((r-1)/2)
-
+  
   A <- numerador/denominador
   return(A)
 }
@@ -282,7 +285,7 @@ revision_intervalo <- function(info_r, des = 5){
   d_ <- rep(info_r$dif, length(x))
   x_ <- calcular_A(info_r$alfa, x, info_r$S1)
   diff <- abs(2*x_ - d_)
-
+  
   i = which(diff == min(diff))
   return(list(r_ = x[i], A = x_[i], r_l = x, A_l = x_, position = i))
 }
@@ -348,17 +351,17 @@ revision_intervalo <- function(info_r, des = 5){
 
 
 calcular_r_MT <- function(T_, D, ro, S1, df1, alfa = 0.05, Beta = 0.1){
-
+  
   info <-
     calcular_df2(
-    t = T_,
-    d = D,
-    r_inicial = ro,
-    df1 = df1,
-    alpha = alfa,
-    beta = Beta,
-    S1_sq = S1^2
-  )
+      t = T_,
+      d = D,
+      r_inicial = ro,
+      df1 = df1,
+      alpha = alfa,
+      beta = Beta,
+      S1_sq = S1^2
+    )
   # resultados de la iteracion
   info2 <- revision_intervalo(info)
   return(list(r = info$r,
