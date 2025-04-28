@@ -2,41 +2,51 @@
 % Please edit documentation in R/metodo_tukey.R
 \name{calcular_S1_df1}
 \alias{calcular_S1_df1}
-\title{Estimación de la desviación estándar y sus grados de libertad}
+\title{Estimación de la desviación estándar corregida y grados de libertad}
 \usage{
-calcular_S1_df1(vector_interes, Si, Ss, max_error = 0.01, confianza = 0.95)
+calcular_S1_df1(
+  desviacion_estandar,
+  Si,
+  Ss,
+  max_error = 0.01,
+  confianza = 0.9,
+  maximum_df = 1000
+)
 }
 \arguments{
-\item{vector_interes}{Vector numérico que representa la variable bajo estudio.}
+\item{desviacion_estandar}{Desviación estándar inicial (en unidades de la variable estudiada).}
 
-\item{Si}{Límite inferior de la desviación estándar (en unidades relativas a la media).}
+\item{Si}{Porcentaje relativo inferior aceptado (por ejemplo, 0.07 corresponde a un 7\\%).}
 
-\item{Ss}{Límite superior de la desviación estándar (en unidades relativas a la media).}
+\item{Ss}{Porcentaje relativo superior aceptado (por ejemplo, 0.12 corresponde a un 12\\%).}
 
-\item{max_error}{Error relativo máximo permitido entre el cociente observado y el estimado (por defecto \code{0.01}).}
+\item{max_error}{Error relativo máximo permitido entre el cociente observado y el cociente esperado (por defecto \code{0.01}).}
 
-\item{confianza}{Nivel de confianza del intervalo original (por defecto \code{0.95}). \strong{(Nota: actualmente no se usa dentro del cálculo, pero puede ser útil para versiones futuras).}}
+\item{confianza}{Nivel de confianza del intervalo considerado (por defecto \code{0.9}). \emph{Actualmente fijo en los cálculos internos.}}
+
+\item{maximum_df}{Máximo número de grados de libertad que se evaluarán (por defecto \code{1000}).}
 }
 \value{
-Una lista con los siguientes elementos:
+Una lista con:
 \describe{
-\item{Media}{Media de la variable observada.}
-\item{S1}{Estimación de la desviación estándar experimental.}
-\item{grados_libertad}{Grados de libertad estimados (df1).}
-\item{valor_x}{Cociente chi-cuadrado usado en la estimación.}
-\item{error_relativo}{Error relativo del cociente estimado respecto al observado.}
+\item{S1}{Estimación corregida de la desviación estándar.}
+\item{grados_libertad}{Número de grados de libertad estimado.}
+\item{valor_x}{Cociente entre cuantiles de chi-cuadrado.}
+\item{error_relativo}{Error relativo del cociente respecto al objetivo.}
 }
 }
 \description{
-Esta función estima la desviación estándar experimental \code{S1} y sus grados de libertad
-(\code{df1}) a partir de los límites inferior y superior de un intervalo de confianza
-para la desviación estándar de una variable cuantitativa. Utiliza cuantiles de la
-distribución \code{chi-cuadrado} para encontrar el número de grados de libertad que
-mejor reproduce el cociente entre los límites dados, dentro de un error relativo permitido.
+Esta función estima una desviación estándar corregida (\code{S1}) y el número de grados de libertad
+(\code{df1}) que reproduce, mediante cocientes de chi-cuadrado, la relación entre un límite superior
+y un límite inferior dados. Se usa un criterio de error relativo máximo permitido para la aceptación del resultado.
+}
+\details{
+Se busca el número de grados de libertad tal que el cociente de los valores críticos de la distribución chi-cuadrado,
+evaluados a \code{p = confianza} y \code{p = 1 - confianza}, sea cercano al cociente observado entre \code{Ss} y \code{Si}.
+El proceso finaliza tan pronto como el error relativo esté por debajo del máximo permitido (\code{max_error}).
 }
 \examples{
 set.seed(123)
-vector_ <- rnorm(1000, mean = 30, sd = 6)
-calcular_S1_df1(vector_interes = vector_, Si = 0.07, Ss = 0.12)
+calcular_S1_df1(desviacion_estandar = 30, Si = 0.07, Ss = 0.12)
 
 }

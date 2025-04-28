@@ -4,7 +4,7 @@ devtools::document()
 
 devtools::install()
 
-library(dexp)
+library(help = dexp)
 
 # Probar con ayuda
 ?calcular_r_MT
@@ -19,8 +19,18 @@ calcular_r_MT(
   df1 = 40
 )
 
+?encontrar_r_minimo
+
+resultado <- encontrar_r_minimo(t = 5, rho = 0.4, potencia_objetivo = 0.8)
+resultado$r_optimo
+resultado$potencia
+resultado$grafico
+resultado$tabla
+
 # Verificar que todo este limpio
 devtools::check()
+usethis::use_package("ggplot2")
+
 
 
 usethis::use_readme_rmd()

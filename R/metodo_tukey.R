@@ -2,8 +2,6 @@
 #' @importFrom stats qf qtukey ptukey qchisq qt
 NULL
 
-# Calcular desviacion estandar y grados de libertad  ----------------------
-
 #' Estimación de la desviación estándar corregida y grados de libertad
 #'
 #' Esta función estima una desviación estándar corregida (\code{S1}) y el número de grados de libertad
@@ -17,14 +15,15 @@ NULL
 #' @param confianza Nivel de confianza del intervalo considerado (por defecto \code{0.9}). *Actualmente fijo en los cálculos internos.*
 #' @param maximum_df Máximo número de grados de libertad que se evaluarán (por defecto \code{1000}).
 #'
-#' @return Una lista con los siguientes elementos:
+#' @return
+#' Una lista con:
 #' \describe{
-#'   \item{Media}{Promedio de los límites corregidos (\code{S1}).}
 #'   \item{S1}{Estimación corregida de la desviación estándar.}
 #'   \item{grados_libertad}{Número de grados de libertad estimado.}
-#'   \item{valor_x}{Cociente calculado entre los cuantiles de chi-cuadrado.}
-#'   \item{error_relativo}{Error relativo del cociente estimado respecto al cociente observado.}
+#'   \item{valor_x}{Cociente entre cuantiles de chi-cuadrado.}
+#'   \item{error_relativo}{Error relativo del cociente respecto al objetivo.}
 #' }
+
 #'
 #' @details
 #' Se busca el número de grados de libertad tal que el cociente de los valores críticos de la distribución chi-cuadrado,
@@ -36,38 +35,38 @@ NULL
 #' calcular_S1_df1(desviacion_estandar = 30, Si = 0.07, Ss = 0.12)
 #'
 #' @export
-
-
-calcular_S1_df1 <- function(desviacion_estandar, 
+calcular_S1_df1 <- function(desviacion_estandar,
                             Si,
-                            Ss, 
+                            Ss,
                             max_error = 0.01,
                             confianza = 0.9,
-                            maximum_df = 1000){
+                            maximum_df = 1000) {
 
-  
   SI <- desviacion_estandar * Si
   SS <- desviacion_estandar * Ss
-  
-  S1 <- (SI + SS)/2
-  
-  Cociente <- round(SS/SI, 2)
-  
-  x <- numeric(n)
-  for(i in 1:n){
-    x[i] <-
-      round(sqrt(qchisq(p = 0.9, df = i)/qchisq(p = 0.1, df = i)), 2)
-    error <- abs(x[i] - Cociente)/Cociente
-    if(x[i] == Cociente |  error < max_error){
-      return(list(Media = media,
-                  S1 = S1,
-                  grados_libertad = i,
-                  valor_x = x[i],
-                  error_relativo = error))
+
+  S1 <- (SI + SS) / 2
+
+  Cociente <- SS / SI
+
+  for (i in 1:maximum_df) {
+    x_i <- sqrt(qchisq(p = confianza, df = i) / qchisq(p = 1 - confianza, df = i))
+    error_relativo <- abs(x_i - Cociente) / Cociente
+
+    if (error_relativo < max_error) {
+      return(list(
+        S1 = S1,
+        grados_libertad = i,
+        valor_x = x_i,
+        error_relativo = error_relativo
+      ))
     }
   }
+
+  warning("No se encontró un número de grados de libertad que cumpla el criterio.")
   return(NULL)
 }
+
 
 
 # Calculo de A ------------------------------------------------------------
@@ -95,10 +94,10 @@ calcular_A <- function(alfa, r, sigma){
   # alfa: Nivel de significancia
   # t: Numero de tratamientos
   # sigma: Desviacion estandar
-  
+
   numerador <- qt(p = 1 - alfa, df = r - 1) * 2 * sigma * gamma(r/2)
   denominador <- sqrt(r)*sqrt((r-1)) * gamma((r-1)/2)
-  
+
   A <- numerador/denominador
   return(A)
 }
@@ -285,7 +284,7 @@ revision_intervalo <- function(info_r, des = 5){
   d_ <- rep(info_r$dif, length(x))
   x_ <- calcular_A(info_r$alfa, x, info_r$S1)
   diff <- abs(2*x_ - d_)
-  
+
   i = which(diff == min(diff))
   return(list(r_ = x[i], A = x_[i], r_l = x, A_l = x_, position = i))
 }
@@ -351,7 +350,7 @@ revision_intervalo <- function(info_r, des = 5){
 
 
 calcular_r_MT <- function(T_, D, ro, S1, df1, alfa = 0.05, Beta = 0.1){
-  
+
   info <-
     calcular_df2(
       t = T_,

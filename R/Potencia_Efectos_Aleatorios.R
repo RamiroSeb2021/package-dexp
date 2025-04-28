@@ -1,12 +1,14 @@
 #' @import stats
 #' @import ggplot2
 #' @importFrom stats qf qtukey ptukey qchisq qt
+#' @importFrom utils install.packages
+
 NULL
 
 #' Simular potencia para ANOVA de efectos aleatorios balanceado
 #'
 #' Ejecuta una simulación de Monte Carlo para estimar la potencia de la prueba
-#' \eqn{F} en un diseño a una vía con efectos aleatorios y \emph{r} réplicas por tratamiento. 
+#' \eqn{F} en un diseño a una vía con efectos aleatorios y \emph{r} réplicas por tratamiento.
 #' Cada observación se genera como
 #' \deqn{Y_{ij} = \tau_i + \varepsilon_{ij},}
 #' donde \eqn{\tau_i \sim N(0,\sigma_\tau^2)} y \eqn{\varepsilon_{ij} \sim N(0,\sigma^2)}.
@@ -33,7 +35,7 @@ simular_potencia <- function(t, r, sigma2 = 1, rho = 0.5, alpha = 0.05, nsim = 1
   sigma2_tau <- rho * sigma2
   f_crit <- qf(1 - alpha, df1 = t - 1, df2 = t * (r - 1))
   rechazos <- numeric(nsim)
-  
+
   for (i in 1:nsim) {
     tau <- rnorm(t, mean = 0, sd = sqrt(sigma2_tau))
     datos <- vector()
@@ -47,7 +49,7 @@ simular_potencia <- function(t, r, sigma2 = 1, rho = 0.5, alpha = 0.05, nsim = 1
     F_obs <- summary(modelo)[[1]]["grupo", "F value"]
     rechazos[i] <- as.numeric(F_obs > f_crit)
   }
-  
+
   mean(rechazos)
 }
 
@@ -91,28 +93,29 @@ encontrar_r_minimo <- function(t, rho, potencia_objetivo = 0.8,
     install.packages("ggplot2")
   }
   library(ggplot2)
-  
+
   resultados <- data.frame(r = integer(0), potencia = numeric(0))
-  
+
   for (r in 2:r_max) {
     potencia <- simular_potencia(t = t, r = r, sigma2 = sigma2,
                                  rho = rho, alpha = alpha, nsim = nsim)
     # cat("Potencia estimada para r =", r, ":", round(potencia, 4), "\n")
     resultados <- rbind(resultados, data.frame(r = r, potencia = potencia))
-    
+
     if (potencia >= potencia_objetivo) {
-      grafico <- ggplot(resultados, aes(x = r, y = potencia)) +
-        geom_line() +
-        geom_point() +
-        geom_text(aes(label = r), vjust = -1, size = 3) +
-        geom_hline(yintercept = potencia_objetivo, linetype = "dashed", color = "red") +
-        labs(
+      grafico <- ggplot2::ggplot(resultados, ggplot2::aes(x = r, y = potencia)) +
+        ggplot2::geom_line() +
+        ggplot2::geom_point() +
+        ggplot2::geom_text(ggplot2::aes(label = r), vjust = -1, size = 3) +
+        ggplot2::geom_hline(yintercept = potencia_objetivo, linetype = "dashed", color = "red") +
+        ggplot2::labs(
           title = "Curva de potencia estimada",
           x = "Número de réplicas (r)",
-          y = "Potencia (1 - β)"
+          y = expression("Potencia (1 - " * beta * ")")
         ) +
-        theme_minimal()
-      
+        ggplot2::theme_minimal()
+
+
       # cat("Se alcanza potencia >= ", potencia_objetivo, " con r =", r, "\n")
       return(list(
         r_optimo = r,
@@ -122,7 +125,7 @@ encontrar_r_minimo <- function(t, rho, potencia_objetivo = 0.8,
       ))
     }
   }
-  
+
   warning("No se alcanzó la potencia deseada con r_max = ", r_max)
   NULL
 }
