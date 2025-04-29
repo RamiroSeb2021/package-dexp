@@ -1,8 +1,13 @@
 usethis::proj_activate("G:/Mi unidad/RSTUDIO_/Diseño_Experimentos/Proyecto_APP/Proyecto_DEXP/dexp")
 
-devtools::document()
 
-devtools::install()
+remove.packages("dexp")
+devtools::clean_dll()
+
+devtools::document()   # genera documentación
+devtools::build()      # empaqueta
+devtools::install()    # instala
+
 
 library(help = dexp)
 

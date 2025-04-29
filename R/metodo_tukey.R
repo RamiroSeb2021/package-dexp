@@ -6,13 +6,13 @@ NULL
 #'
 #' Esta función estima una desviación estándar corregida (\code{S1}) y el número de grados de libertad
 #' (\code{df1}) que reproduce, mediante cocientes de chi-cuadrado, la relación entre un límite superior
-#' y un límite inferior dados. Se usa un criterio de error relativo máximo permitido para la aceptación del resultado.
+#' y un límite inferior dados. Se usa un criterio de error relativo máximo permitido para aceptar el resultado.
 #'
 #' @param desviacion_estandar Desviación estándar inicial (en unidades de la variable estudiada).
-#' @param Si Porcentaje relativo inferior aceptado (por ejemplo, 0.07 corresponde a un 7\%).
-#' @param Ss Porcentaje relativo superior aceptado (por ejemplo, 0.12 corresponde a un 12\%).
+#' @param Si Porcentaje relativo inferior aceptado (por ejemplo, 0.07 corresponde a un 7%).
+#' @param Ss Porcentaje relativo superior aceptado (por ejemplo, 0.12 corresponde a un 12%).
 #' @param max_error Error relativo máximo permitido entre el cociente observado y el cociente esperado (por defecto \code{0.01}).
-#' @param confianza Nivel de confianza del intervalo considerado (por defecto \code{0.9}). *Actualmente fijo en los cálculos internos.*
+#' @param confianza Nivel de confianza del intervalo considerado (por defecto \code{0.9}).
 #' @param maximum_df Máximo número de grados de libertad que se evaluarán (por defecto \code{1000}).
 #'
 #' @return
@@ -23,18 +23,20 @@ NULL
 #'   \item{valor_x}{Cociente entre cuantiles de chi-cuadrado.}
 #'   \item{error_relativo}{Error relativo del cociente respecto al objetivo.}
 #' }
-
 #'
 #' @details
 #' Se busca el número de grados de libertad tal que el cociente de los valores críticos de la distribución chi-cuadrado,
 #' evaluados a \code{p = confianza} y \code{p = 1 - confianza}, sea cercano al cociente observado entre \code{Ss} y \code{Si}.
 #' El proceso finaliza tan pronto como el error relativo esté por debajo del máximo permitido (\code{max_error}).
 #'
+#' El parámetro \code{confianza} actualmente se fija en los cálculos internos.
+#'
 #' @examples
 #' set.seed(123)
 #' calcular_S1_df1(desviacion_estandar = 30, Si = 0.07, Ss = 0.12)
 #'
 #' @export
+
 calcular_S1_df1 <- function(desviacion_estandar,
                             Si,
                             Ss,
