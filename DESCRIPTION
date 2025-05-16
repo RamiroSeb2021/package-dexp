@@ -1,9 +1,15 @@
 Package: dexp
-Title: What the Package Does (One Line, Title Case)
+Title: Diseño y Cálculo de Réplicas para Experimentos con Restricciones
 Version: 0.0.0.9000
 Authors@R: 
     person("First", "Last", , "first.last@example.com", role = c("aut", "cre"))
-Description: What the package does (one paragraph).
+Description: Este paquete facilita la planificación y optimización de experimentos
+    considerando restricciones presupuestales, variabilidad entre tratamientos y modelos 
+    con efectos aleatorios. Incluye funciones para el cálculo teórico y empírico del número 
+    de réplicas necesarias bajo distintos enfoques metodológicos, como el método de 
+    Harris–Hurvitz–Mood, el enfoque de Tukey y simulaciones Monte Carlo. La librería permite 
+    asignar réplicas óptimas con base en varianzas, costos o potencia estadística, y está diseñada 
+    para integrarse en aplicaciones interactivas de apoyo a la toma de decisiones experimentales.
 License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
     license
 Encoding: UTF-8
@@ -11,3 +17,6 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 Imports: 
     ggplot2
+
+
+
