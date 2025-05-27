@@ -23,20 +23,20 @@ calcular_r_minimo_HHM(
 
 \item{r_inicial}{Valor inicial para el número de réplicas.}
 
-\item{S1_sq}{Estimación de la varianza experimental (\code{S1^2}).}
+\item{S1_sq}{Estimación de la varianza experimental \eqn{S1^2}.}
 
 \item{df1}{Grados de libertad asociados al estimador de varianza experimental.}
 
-\item{alpha_}{Nivel de significancia (por defecto \code{0.05}).}
+\item{alpha_}{Nivel de significancia (por defecto 0.05).}
 
-\item{beta_}{Error tipo II (\code{1 - potencia deseada}, por defecto \code{0.8}).}
+\item{beta_}{Error tipo II (1 - potencia deseada, por defecto 0.8).}
 
-\item{max_error}{Error relativo máximo permitido para la convergencia (por defecto \code{0.01}).}
+\item{max_error}{Error relativo máximo permitido para la convergencia (por defecto 0.01).}
 
-\item{max_iter}{Número máximo de iteraciones permitidas (por defecto \code{1000}).}
+\item{max_iter}{Número máximo de iteraciones permitidas (por defecto 1000).}
 }
 \value{
-Una lista con los siguientes elementos:
+Una lista con:
 \describe{
 \item{r}{Número mínimo de réplicas requeridas (redondeado hacia arriba).}
 \item{S1}{Desviación estándar estimada a partir de \code{S1_sq}.}
@@ -45,27 +45,21 @@ Una lista con los siguientes elementos:
 \item{dif}{Diferencia mínima detectable utilizada.}
 \item{alfa}{Nivel de significancia.}
 \item{iteraciones}{Número de iteraciones realizadas.}
-\item{convergencia}{\code{TRUE} si se alcanzó convergencia; \code{FALSE} si se alcanzó el límite de iteraciones.}
-\item{K_}{Valor de \(k = a / s_1\) que garantiza la potencia deseada, obtenido por simulación Monte Carlo mediante \code{k_tabla_mc()}.}
+\item{convergencia}{\code{TRUE} si se alcanzó convergencia; \code{FALSE} si no.}
+\item{K_}{Valor de \eqn{k = a/s1} que garantiza la potencia deseada, obtenido por \code{k_tabla_mc()}.}
 }
 }
 \description{
-Esta función estima de forma iterativa el número mínimo de réplicas necesarias \code{r}
+Esta función estima de forma iterativa el número mínimo de réplicas necesarias (\eqn{r})
 en un diseño experimental con múltiples tratamientos, empleando el método de Harris–Hurvitz–Mood (HHM).
-La estimación se basa en el ajuste simultáneo de \code{df2}, el valor de \code{K'} proveniente de la tabla
-de potencia (calculado mediante \code{k_tabla_mc}), y la fórmula:
 }
 \details{
+El valor de \eqn{r} se calcula con la fórmula:
 \deqn{
-  r = 2(df_2 + 1)\left(\frac{K' \cdot S_1}{d}\right)^2
+  r = 2 \cdot (df_2 + 1) \cdot \left( \frac{K' \cdot S_1}{d} \right)^2
 }
-
-El proceso se repite hasta que el cambio relativo entre iteraciones sucesivas sea menor a un umbral
-especificado por \code{max_error}, o hasta alcanzar el número máximo de iteraciones.
-
-Esta función es útil en contextos donde el valor de \code{K'} depende del número de grados de libertad
-\code{df2}, que a su vez depende de \code{r}. El proceso iterativo ajusta ambos hasta que el número
-de réplicas requerido estabiliza su valor.
+Este valor se ajusta iterativamente junto con \eqn{df2 = t(r - 1)} hasta que el cambio relativo
+entre iteraciones sea menor a \code{max_error}.
 }
 \examples{
 resultados <- calcular_r_minimo_HHM(
@@ -84,5 +78,5 @@ resultados$df2    # grados de libertad del error final
 
 }
 \seealso{
-\code{\link{k_tabla_mc}}, \code{\link{obtener_K_A9}}, \code{\link{calcular_df2}}
+\code{\link{k_tabla_mc}}
 }

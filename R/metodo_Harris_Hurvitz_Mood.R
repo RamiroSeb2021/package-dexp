@@ -1,27 +1,36 @@
-#' Calcular el valor \(k = a/s_1\) para tablas de potencia (simulación Monte Carlo)
+#' @import stats
+#' @import ggplot2
+#' @importFrom stats qf qtukey ptukey qchisq qt
+#' @importFrom utils install.packages
+
+NULL
+
+#' Calcular el valor k = a/s1 para tablas de potencia (simulación Monte Carlo)
 #'
-#' Esta función estima el valor \(k = a/s_1\) necesario para que una prueba de Student
-#' unitaria (una sola cola), con \(\alpha\) nivel de significancia y \(\beta\) potencia,
-#' rechace la hipótesis nula \(\mu=0\) cuando la media verdadera es \(\mu=a\).
-#' Utiliza simulación Monte Carlo de las distribuciones muestrales de \(s_1\) y \(s_2\).
+#' Esta función estima el valor \eqn{k = a/s1} necesario para que una prueba de Student
+#' unitaria (una sola cola), con \eqn{\alpha} nivel de significancia y \eqn{\beta} potencia,
+#' rechace la hipótesis nula \eqn{\mu = 0} cuando la media verdadera es \eqn{\mu = a}.
+#' Utiliza simulación Monte Carlo de las distribuciones muestrales de \eqn{s1} y \eqn{s2}.
 #'
-#' @param n  Integer. Grados de libertad de la desviación estándar muestral nueva \(s_2\).
-#' @param m  Integer. Grados de libertad de la desviación estándar preliminar \(s_1\).
-#' @param beta Numeric. Potencia deseada de la prueba (\(1-\) error tipo II), por defecto 0.80.
-#' @param alpha Numeric. Nivel de significancia de la prueba (cola superior), por defecto 0.05.
-#' @param B Integer. Número de réplicas de Monte Carlo para estimar potencias, por defecto 2e6.
-#' @param seed Integer. Semilla para reproducibilidad de la simulación, por defecto 1.
-#' @param tol  Numeric. Tolerancia de la búsqueda de raíces con \code{uniroot()}, por defecto 0.001.
+#' @param n Grados de libertad de la desviación estándar muestral nueva \eqn{s2}.
+#' @param m Grados de libertad de la desviación estándar preliminar \eqn{s1}.
+#' @param beta Potencia deseada de la prueba (\eqn{1 - \text{error tipo II}}), por defecto 0.80.
+#' @param alpha Nivel de significancia de la prueba (cola superior), por defecto 0.05.
+#' @param B Número de réplicas de Monte Carlo para estimar potencia, por defecto 2e6.
+#' @param seed Semilla para reproducibilidad de la simulación, por defecto 1.
+#' @param tol Tolerancia de la búsqueda de raíces con \code{uniroot()}, por defecto 0.001.
 #'
-#' @return Numeric. Estimación de \(k = a/s_1\) que logra potencia \code{beta} al nivel \code{alpha}.
+#' @return Valor numérico \eqn{k = a/s1} que garantiza la potencia \code{beta} al nivel \code{alpha}.
 #'
 #' @details
-#' 1. Se simulan \code{B} valores de
-#'    \(\,s_1 \sim \sqrt{\chi^2_m / m}\) y \(\,s_2 \sim \sqrt{\chi^2_n / n}\).
-#' 2. Para cada \(k\) candidato, se fija \(a = k\,s_1\), se simulan \(\bar X \sim N(a,\,1/(n+1))\)
-#'    y se computa la estadística \(t = \sqrt{n+1}\,\bar X / s_2\).
-#' 3. La potencia empírica es la proporción de réplicas donde \(t > t_{1-\alpha}(n)\).
-#' 4. \code{uniroot()} busca el \(k\) tal que la potencia simulada sea igual a \code{beta}.
+#' \describe{
+#'   \item{1.}{Se simulan \eqn{B} valores de \eqn{s1 \sim \sqrt{\chi^2_m / m}} y \eqn{s2 \sim \sqrt{\chi^2_n / n}}.}
+#'   \item{2.}{Para cada \eqn{k} candidato, se fija \eqn{a = k \cdot s1} y se simula \eqn{\bar X \sim N(a, 1/(n+1))}.}
+#'   \item{3.}{Se computa \eqn{t = \sqrt{n+1} \cdot \bar X / s2}.}
+#'   \item{4.}{La potencia empírica es la proporción de réplicas donde \eqn{t > t_{1-\alpha}(n)}.}
+#'   \item{5.}{\code{uniroot()} busca el \eqn{k} tal que la potencia simulada sea igual a \code{beta}.}
+#' }
+#'
 #'
 #' @examples
 #' # Generar la tabla completa de k para beta = 0.95, alpha = 0.05
@@ -43,8 +52,8 @@
 #'     k_matrix[i, j] <- k_tabla_mc(n, m,
 #'                                   beta = 0.95,
 #'                                   alpha = 0.05,
-#'                                   B = 5e5,   # ajustar B si se desea más precisión
-#'                                   tol = 1e-3)
+#'                                   B = 5e5   # ajustar B si se desea más precisión
+#'                                   )
 #'   }
 #' }
 #'
@@ -62,7 +71,7 @@ k_tabla_mc <- function(n, m, beta = 0.80, alpha = 0.05,
   tcrit <- qt(1 - alpha, df = n)
   s1 <- sqrt(rchisq(B, m) / m)
   s2 <- sqrt(rchisq(B, n) / n)
-  
+
   potencia <- function(k) {
     a <- k * s1
     xbar <- rnorm(B, mean = a, sd = 1 / sqrt(n + 1))
@@ -75,29 +84,20 @@ k_tabla_mc <- function(n, m, beta = 0.80, alpha = 0.05,
 
 #' Cálculo iterativo del número mínimo de réplicas usando el método de Harris–Hurvitz–Mood (HHM)
 #'
-#' Esta función estima de forma iterativa el número mínimo de réplicas necesarias \code{r}
+#' Esta función estima de forma iterativa el número mínimo de réplicas necesarias (\eqn{r})
 #' en un diseño experimental con múltiples tratamientos, empleando el método de Harris–Hurvitz–Mood (HHM).
-#' La estimación se basa en el ajuste simultáneo de \code{df2}, el valor de \code{K'} proveniente de la tabla
-#' de potencia (calculado mediante \code{k_tabla_mc}), y la fórmula:
-#'
-#' \deqn{
-#'   r = 2(df_2 + 1)\left(\frac{K' \cdot S_1}{d}\right)^2
-#' }
-#'
-#' El proceso se repite hasta que el cambio relativo entre iteraciones sucesivas sea menor a un umbral
-#' especificado por \code{max_error}, o hasta alcanzar el número máximo de iteraciones.
 #'
 #' @param t Número de tratamientos.
 #' @param d Diferencia mínima detectable entre medias.
 #' @param r_inicial Valor inicial para el número de réplicas.
-#' @param S1_sq Estimación de la varianza experimental (\code{S1^2}).
+#' @param S1_sq Estimación de la varianza experimental \eqn{S1^2}.
 #' @param df1 Grados de libertad asociados al estimador de varianza experimental.
-#' @param alpha_ Nivel de significancia (por defecto \code{0.05}).
-#' @param beta_ Error tipo II (\code{1 - potencia deseada}, por defecto \code{0.8}).
-#' @param max_error Error relativo máximo permitido para la convergencia (por defecto \code{0.01}).
-#' @param max_iter Número máximo de iteraciones permitidas (por defecto \code{1000}).
+#' @param alpha_ Nivel de significancia (por defecto 0.05).
+#' @param beta_ Error tipo II (1 - potencia deseada, por defecto 0.8).
+#' @param max_error Error relativo máximo permitido para la convergencia (por defecto 0.01).
+#' @param max_iter Número máximo de iteraciones permitidas (por defecto 1000).
 #'
-#' @return Una lista con los siguientes elementos:
+#' @return Una lista con:
 #' \describe{
 #'   \item{r}{Número mínimo de réplicas requeridas (redondeado hacia arriba).}
 #'   \item{S1}{Desviación estándar estimada a partir de \code{S1_sq}.}
@@ -106,16 +106,20 @@ k_tabla_mc <- function(n, m, beta = 0.80, alpha = 0.05,
 #'   \item{dif}{Diferencia mínima detectable utilizada.}
 #'   \item{alfa}{Nivel de significancia.}
 #'   \item{iteraciones}{Número de iteraciones realizadas.}
-#'   \item{convergencia}{\code{TRUE} si se alcanzó convergencia; \code{FALSE} si se alcanzó el límite de iteraciones.}
-#'   \item{K_}{Valor de \(k = a / s_1\) que garantiza la potencia deseada, obtenido por simulación Monte Carlo mediante \code{k_tabla_mc()}.}
+#'   \item{convergencia}{\code{TRUE} si se alcanzó convergencia; \code{FALSE} si no.}
+#'   \item{K_}{Valor de \eqn{k = a/s1} que garantiza la potencia deseada, obtenido por \code{k_tabla_mc()}.}
 #' }
 #'
 #' @details
-#' Esta función es útil en contextos donde el valor de \code{K'} depende del número de grados de libertad
-#' \code{df2}, que a su vez depende de \code{r}. El proceso iterativo ajusta ambos hasta que el número
-#' de réplicas requerido estabiliza su valor.
+#' El valor de \eqn{r} se calcula con la fórmula:
+#' \deqn{
+#'   r = 2 \cdot (df_2 + 1) \cdot \left( \frac{K' \cdot S_1}{d} \right)^2
+#' }
+#' Este valor se ajusta iterativamente junto con \eqn{df2 = t(r - 1)} hasta que el cambio relativo
+#' entre iteraciones sea menor a \code{max_error}.
 #'
-#' @seealso \code{\link{k_tabla_mc}}, \code{\link{obtener_K_A9}}, \code{\link{calcular_df2}}
+#' @seealso \code{\link{k_tabla_mc}}
+#'
 #'
 #' @examples
 #' resultados <- calcular_r_minimo_HHM(
@@ -135,14 +139,14 @@ k_tabla_mc <- function(n, m, beta = 0.80, alpha = 0.05,
 #' @export
 
 
-calcular_r_minimo_HHM <- function(t, 
-                                  d, 
-                                  r_inicial, 
+calcular_r_minimo_HHM <- function(t,
+                                  d,
+                                  r_inicial,
                                   S1_sq,
-                                  df1, 
-                                  alpha_ = 0.05, 
-                                  beta_ = 0.8, 
-                                  max_error = 0.01, 
+                                  df1,
+                                  alpha_ = 0.05,
+                                  beta_ = 0.8,
+                                  max_error = 0.01,
                                   max_iter = 1000) {
   # Inicializar
   r_est <- r_inicial
@@ -171,7 +175,7 @@ calcular_r_minimo_HHM <- function(t,
     alfa = alpha_,
     iteraciones = iter,
     convergencia = error <= max_error,
-    K_ = K 
+    K_ = K
   ))
 }
 

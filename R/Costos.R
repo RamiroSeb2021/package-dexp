@@ -23,10 +23,10 @@
 #'
 #' @examples
 #' sigmas <- c(6.27, 9.57, 12, 3.32)
-#' proporcionalidad_sin_costo_ni_tamaño_de_muestra(a = 4, r0 = 5, sigmas = sigmas)
+#' proporcionalidad_sin_costo_ni_tamano_de_muestra(a = 4, r0 = 5, sigmas = sigmas)
 #'
 #' @export
-proporcionalidad_sin_costo_ni_tamaño_de_muestra <- function(a, r0, sigmas) {
+proporcionalidad_sin_costo_ni_tamano_de_muestra <- function(a, r0, sigmas) {
   if (length(sigmas) != a) {
     stop("La cantidad de tratamientos no coincide con la longitud del vector de desviaciones")
   }
@@ -67,10 +67,10 @@ proporcionalidad_sin_costo_ni_tamaño_de_muestra <- function(a, r0, sigmas) {
 #' sigmas <- c(6.27, 9.57, 12, 3.32)
 #' costos <- c(1000, 200, 700, 1100)
 #' costo_total <- 50000
-#' proporcionalidad_con_costo_ni_tamaño_de_muestra(a = 4, sigmas = sigmas, costos = costos, costo_total = costo_total)
+#' proporcionalidad_con_costo_ni_tamano_de_muestra(a = 4, sigmas = sigmas, costos = costos, costo_total = costo_total)
 #'
 #' @export
-proporcionalidad_con_costo_ni_tamaño_de_muestra <- function(a, sigmas, costos, costo_total) {
+proporcionalidad_con_costo_ni_tamano_de_muestra <- function(a, sigmas, costos, costo_total) {
   if (length(sigmas) != a) {
     stop("La cantidad de tratamientos no coincide con la longitud del vector de desviaciones")
   }
