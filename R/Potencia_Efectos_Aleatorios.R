@@ -15,7 +15,7 @@ NULL
 #'
 #' @param t Número de tratamientos \eqn{t}.
 #' @param r Número de réplicas por tratamiento \eqn{r}.
-#' @param sigma2 Varianza intratratamiento \eqn{\sigma^2}. (default: 1)
+#' @param sigma2 Varianza del error \eqn{\sigma^2}. (default: 1)
 #' @param rho Razón de varianzas \eqn{\rho = \sigma_\tau^2 / \sigma^2}. (default: 0.5)
 #' @param alpha Nivel de significancia. (default: 0.05)
 #' @param nsim Número de simulaciones de Monte Carlo. (default: 1000)
@@ -63,7 +63,7 @@ simular_potencia <- function(t, r, sigma2 = 1, rho = 0.5, alpha = 0.05, nsim = 1
 #' @param t Número de tratamientos \eqn{t}.
 #' @param rho Razón de varianzas \eqn{\rho = \sigma_\tau^2 / \sigma^2}.
 #' @param potencia_objetivo Potencia deseada (1 - β). (default: 0.8)
-#' @param sigma2 Varianza intratratamiento \eqn{\sigma^2}. (default: 1)
+#' @param sigma2 Varianza del error \eqn{\sigma^2}. (default: 1)
 #' @param alpha Nivel de significancia. (default: 0.05)
 #' @param nsim Número de simulaciones de Monte Carlo por valor de \eqn{r}. (default: 1000)
 #' @param r_max Límite superior para la búsqueda de \eqn{r}. (default: 50)

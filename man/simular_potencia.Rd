@@ -11,7 +11,7 @@ simular_potencia(t, r, sigma2 = 1, rho = 0.5, alpha = 0.05, nsim = 1000)
 
 \item{r}{Número de réplicas por tratamiento \eqn{r}.}
 
-\item{sigma2}{Varianza intratratamiento \eqn{\sigma^2}. (default: 1)}
+\item{sigma2}{Varianza del error \eqn{\sigma^2}. (default: 1)}
 
 \item{rho}{Razón de varianzas \eqn{\rho = \sigma_\tau^2 / \sigma^2}. (default: 0.5)}
 

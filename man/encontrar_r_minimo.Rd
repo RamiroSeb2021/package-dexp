@@ -21,7 +21,7 @@ encontrar_r_minimo(
 
 \item{potencia_objetivo}{Potencia deseada (1 - β). (default: 0.8)}
 
-\item{sigma2}{Varianza intratratamiento \eqn{\sigma^2}. (default: 1)}
+\item{sigma2}{Varianza del error \eqn{\sigma^2}. (default: 1)}
 
 \item{alpha}{Nivel de significancia. (default: 0.05)}
 
